@@ -94,9 +94,9 @@ class MexFunction : public matlab::mex::Function {
             //Calculation C := alpha* A * B + beta * C
             auto alpha = std::complex<double>(1,0);
             auto beta = std::complex<double>(1,0);
-            char * trans_A; trans_A[0] = 'n';
-            char * trans_B; trans_B[0] = 'n';
-            
+            const char* trans_A = "n";
+            const char* trans_B = "n";
+
             //Calling blas function (currently does not compile)
             blas::zgemm(trans_A, trans_B,
                         &M, &N, &K, (double *) &alpha,
