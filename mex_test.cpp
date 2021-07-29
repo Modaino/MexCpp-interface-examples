@@ -43,37 +43,30 @@ class MexFunction : public matlab::mex::Function {
         auto myType = inputs[0].getType();
         /* Structure: list info about all fields */
         if ( myType ==  matlab::data::ArrayType::STRUCT) {
-            stream << "Input is a struct\nWith field names:\n";
+            stream << "Input is a struct..." << std::endl << "complex array expeted" << std::endl;
             mexprintf(stream);
-            // const StructArray myStruct = inputs[0];
-            // constMatMatrixStrucs myMatMat(myStruct);
-            // for(std::string element : myMatMat.getFieldNames()){ //NOTE: auto makes (bad) cast const char*
-            //     stream << element << "\n";
-            //     mexprintf(stream);
-            // }
+
         }   
 
         /* Cell: list data info about all cells */
         else if ( myType ==  matlab::data::ArrayType::CELL ) {
-            stream << "Input is a cell...\n" ;
-            mexprintf(stream);
-
-            //const version
+            stream << "Input is a cell..." << std::endl;
             
             const CellArray myConstCell = inputs[0];
             constMatMatrixCells<TypedArray<double>> myMatMat(myConstCell);
             for (size_t i = 0; i < myMatMat.get_cols(); i++)
             {
                 const TypedArray<double> elem_i = myMatMat(i);
-                stream << elem_i[2][2] << "\n";
-                mexprintf(stream);
+                stream << "The 3,3 element of the "<< i << "th array is " << elem_i[2][2] << std::endl;
+                
             }
+            stream << "complex array expeted" << std::endl;
+            mexprintf(stream);
         }   
         
         /* Other type: display size of data */
         else if ( myType == matlab::data::ArrayType::COMPLEX_DOUBLE ) {
             //source: https://www.mathworks.com/help/matlab/matlab_external/avoid-copies-of-large-arrays.html
-
             //const TypedArray<std::complex<double>> inArray = inputs[0];
             //const ensures that the variable is shared (no copy)
 
@@ -96,6 +89,20 @@ class MexFunction : public matlab::mex::Function {
             std::complex<double> A[9] = {I, one, I};
             std::complex<double> B[9] = {one, I, one};
             std::complex<double> C[9] = {one, I, one};
+
+            stream << "The A matrix:" << std::endl;
+            for (size_t i = 0; i < 3; i++) {
+                for (size_t j = 0; j < 3; j++) { stream << A[3*i + j]; }
+                stream << std::endl;
+            }
+
+            stream << "The B matrix:" << std::endl;
+            for (size_t i = 0; i < 3; i++) {
+                for (size_t j = 0; j < 3; j++) { stream << B[3*i + j]; }
+                stream << std::endl;
+            }
+            
+            mexprintf(stream);
 
             //Preparing constant arguments
             const size_t m = (size_t) 3;
@@ -120,26 +127,12 @@ class MexFunction : public matlab::mex::Function {
             const double* alpha = (const double*) palpha;
             const double* beta = (const double*) pbeta;
 
+            const char* trans_A = "n";
+            const char* trans_B = "n";
 
             //Calculation C := alpha* A * B + beta * C
 
             
-            const char* trans_A = "n";
-            const char* trans_B = "n";
-
-            stream << "The A matrix:" << std::endl;
-            for (size_t i = 0; i < 3; i++) {
-                for (size_t j = 0; j < 3; j++) { stream << A[3*i + j]; }
-                stream << std::endl;
-            }
-
-            stream << "The B matrix:" << std::endl;
-            for (size_t i = 0; i < 3; i++) {
-                for (size_t j = 0; j < 3; j++) { stream << B[3*i + j]; }
-                stream << std::endl;
-            }
-            
-            mexprintf(stream);
             //Prepare ppointers
             const std::complex<double>* pA = A;
             const std::complex<double>* pB = B;
@@ -152,7 +145,8 @@ class MexFunction : public matlab::mex::Function {
                         (const double*) pB, &LDB,
                         beta,
                         (double *) pC, &LDC);
-
+                        
+            //Preparing output
             matlab::data::buffer_ptr_t<std::complex<double>> dummy = inArray.release();
             outputs[0] = factory.createArrayFromBuffer(dims, std::move(dummy));
             stream << "The C matrix:" << std::endl;
