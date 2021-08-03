@@ -64,8 +64,10 @@ class MexFunction : public matlab::mex::Function {
             }
             //stream << "Array size: " << inArray_size << std::endl; 
 
-			int rowsA, colsB, common;
-			int i,j,k;
+			//stream << "The size of size_t: " << sizeof(inArray_size) << std::endl;
+
+			int64_t rowsA, colsB, common;
+			int64_t i,j,k;
 			rowsA = 2; colsB = 4; common = 6;
 
 			double A[rowsA * common]; double B[common * colsB];
@@ -78,7 +80,7 @@ class MexFunction : public matlab::mex::Function {
 
 			mexprintf(stream);
 
-			blas::dgemm_(&transA, &transB, &rowsA, &colsB, &common, &one, A, 
+			blas::dgemm(&transA, &transB, &rowsA, &colsB, &common, &one, A, 
 			&rowsA, B, &common, &zero, C, &rowsA);
 
 			for(i=0;i<colsB;i++){
